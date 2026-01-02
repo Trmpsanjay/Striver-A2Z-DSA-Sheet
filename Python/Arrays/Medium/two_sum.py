@@ -1,44 +1,41 @@
+from typing import List
+
 class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         """
-        Intuition (hash map / dictionary):
-        We want two numbers that add up to target.
-        For each number x, the only number that can pair with it is:
-            needed = target - x
+        Two Sum (return indices)
 
-        Layman example:
-        Target = 10.
-        If you currently have 7 in your hand, you immediately know you need 3.
-        So you check: "Have I seen a 3 before?"
-          - If yes -> you found the pair.
-          - If no  -> remember 7 for later.
+        Logic to remember:
+        - For each number x, the partner needed is: needed = target - x
+        - If we've already seen `needed`, we found the answer.
+        - Otherwise store x with its index for future.
 
-        Real-life example:
-        Shopping budget:
-        You have to buy exactly 2 items whose prices sum to a fixed budget (target).
-        While scanning prices one by one:
-          - For each price, you compute the remaining budget needed.
-          - You keep a notebook (hash map) of prices you've already seen and their index.
-          - The moment you see a price that completes a previous one, you stop.
+        Real-life analogy:
+        - Budget = target.
+        - While scanning item prices, for each price x you ask:
+          "Do I already have an item priced (target - x)?"
+          If yes, those two items complete the budget.
 
-        Why the map helps:
-        - Looking up "have I seen needed before?" is O(1) average.
-        - So whole solution becomes O(n) instead of O(n^2).
+        Complexity:
+        - Time: O(n) average (hash lookups)
+        - Space: O(n)
 
-        map stores: value -> index (number -> where we saw it)
+        Common mistakes:
+        - Storing before checking can break when target is 2*x and duplicates matter.
+          (Your code checks first, then stores -> correct.)
         """
 
-        seen = {}  # dictionary to store {number: index}
+        map = {}  # number -> index where we saw it
 
         for i in range(len(nums)):
-            needed = target - nums[i]  # what number would complete the pair?
+            nums_to_be_find = target - nums[i]   # needed partner to reach target
 
-            # If we've seen 'needed' before, we found the answer
-            if needed in seen:
-                return [seen[needed], i]
+            # If partner already seen, return its index + current index
+            if map.get(nums_to_be_find) is not None:
+                return [map.get(nums_to_be_find), i]
 
-            # Otherwise, remember current number and its index for future pairing
-            seen[nums[i]] = i
+            # Otherwise remember current number for future matches
+            else:
+                map[nums[i]] = i
 
-        # If no pair found (LeetCode usually guarantees one exists)
         return None
