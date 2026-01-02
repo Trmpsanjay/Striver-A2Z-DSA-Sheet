@@ -1,0 +1,60 @@
+from typing import List
+
+class Solution:
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        """
+        Count number of continuous subarrays whose sum equals k.
+
+        Key idea (Prefix Sum + HashMap):
+        - prefix_sum[i] = sum of nums[0..i]
+        - Sum of subarray (j+1 .. i) = prefix_sum[i] - prefix_sum[j]
+        - We want: prefix_sum[i] - prefix_sum[j] = k
+                 => prefix_sum[j] = prefix_sum[i] - k
+
+        So for each position i:
+        - compute current prefix_sum
+        - count how many times (prefix_sum - k) has occurred before
+          (each occurrence gives one valid subarray ending at i)
+
+        Layman example:
+        Imagine you keep a running balance of your expenses.
+        If today your running total is 20 and you want a subarray sum of k=7,
+        then you need a previous running total of 13 (because 20 - 13 = 7).
+        If you’ve seen 13 multiple times before, that means multiple subarrays end today with sum 7.
+
+        Why `pre_sum_map = {0: 1}` is IMPORTANT ("do not forget this"):
+        - It handles subarrays that start from index 0.
+        - Example: nums = [3, 4], k = 7
+          prefix_sum becomes 7 at the end.
+          We need (7 - 7) = 0 to be present once, so we count that subarray.
+        - Without {0:1}, you would miss those cases.
+
+        Complexity:
+        - Time: O(n)
+        - Space: O(n)
+
+        Common pain points / mistakes:
+        1) Using a set instead of a frequency map:
+           - We need counts because same prefix_sum can appear multiple times.
+        2) Updating the map before counting:
+           - Must count first using current prefix_sum, then update map.
+        3) Forgetting {0:1}:
+           - Misses subarrays starting at index 0.
+        """
+
+        pre_sum_map = {0: 1}  # prefix_sum 0 has occurred once (empty prefix)
+        count = 0
+        pre_sum = 0
+
+        for num in nums:
+            pre_sum += num  # running prefix sum up to current index
+
+            # We want previous prefix_sum = pre_sum - k
+            result = pre_sum_map.get(pre_sum - k)
+            if result is not None:
+                count += result  # add how many times that needed prefix sum occurred
+
+            # Store current prefix sum frequency
+            pre_sum_map[pre_sum] = 1 if pre_sum_map.get(pre_sum) is None else pre_sum_map.get(pre_sum) + 1
+
+        return count
